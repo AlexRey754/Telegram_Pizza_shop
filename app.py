@@ -10,6 +10,8 @@ async def on_startup(dispatcher):
     # Устанавливаем дефолтные команды
 
     await set_default_commands(dispatcher)
+
+    ''' Откомментировать для заполнения базы'''
     # upload_all()
 
 if __name__ == '__main__':
