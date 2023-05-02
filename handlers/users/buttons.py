@@ -5,7 +5,7 @@ from aiogram.dispatcher import FSMContext
 from loader import dp
 from utils.db_api import db
 from data.config import ADMINS,PAYMENT_TOKEN
-from states import ChangePrice,OrderState
+from states import OrderState
 from loader import bot
 
 
