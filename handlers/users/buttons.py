@@ -27,10 +27,6 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
         case '👨‍🦳 Список пользователей':
             text = db.show_all_users()
             await message.answer(text)
-                    
-        case '✍️Изменить цену на позицию':
-            await message.answer('Введите id позиции у которой хотите изменить цену',reply_markup=keyboards.default.cancel)
-            await ChangePrice.id.set()
 
         case '◀️Главное меню': 
                 await message.answer('Меню',reply_markup=keyboards.default.menu)

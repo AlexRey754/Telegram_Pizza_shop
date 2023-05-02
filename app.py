@@ -12,7 +12,7 @@ async def on_startup(dispatcher):
     await set_default_commands(dispatcher)
 
     ''' Откомментировать для заполнения базы'''
-    # upload_all()
+    upload_all()
 
 if __name__ == '__main__':
     db.create_db()

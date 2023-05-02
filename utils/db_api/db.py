@@ -2,7 +2,7 @@ from sqlalchemy import create_engine,update
 from sqlalchemy.orm import sessionmaker
 
 
-from sqlalchemy import Column, Integer,String, ForeignKey
+from sqlalchemy import Column, Integer,String, BLOB, ForeignKey
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -26,7 +26,9 @@ class Products(Base):
     __tablename__ = 'products'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
+    category = Column(String)
     description = Column(String)
+    img = Column(BLOB)
     price = Column(Integer)  
 
     def __init__(self, name, description, price):

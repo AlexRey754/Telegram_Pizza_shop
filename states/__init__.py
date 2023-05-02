@@ -9,10 +9,6 @@ class AddPosition(StatesGroup):
     description = State()
     price = State()
 
-class ChangePrice(StatesGroup):
-    id = State()
-    price = State()
-
 class OrderState(StatesGroup):
     adress = State()
 
