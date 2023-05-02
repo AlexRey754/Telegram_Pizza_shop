@@ -80,32 +80,30 @@ def check_user_registration(row_uid:int):
     except:
         return False
     
-def add_position_to_db(name, category, description, img_name, price):
+def add_position_to_db(kwargs):
 
-    request = Products(name, category, description, img_name, price)
+    request = Products(**kwargs)
     session.add(request)
     session.commit()
 
-def show_all_position(to_delete=False):
+def show_all_position():
     text = 'id | НАЗВАНИЕ | ЦЕНА\n'
-    request = session.query(Products).order_by(Products.id).all()
+    request = session.query(Products).order_by(Products.category).all()
     for raw in request:
         text = text + f'{raw.id}| {raw.name} | {raw.price} UAH \n'
 
     return text
 
-def change_price(id, new_price):
-    request = session.query(Products).get(id)
-    request.price = new_price
-
-    session.commit()   
+def get_item(id):
+    request = session.query(Products).filter(Products.id==id).first()
+    return request
 
 def _show_list_category() -> tuple:
     request = session.query(Products.category).distinct(Products.category)
     return request
 
-def _show_pos_list(colname) -> tuple:
-    request = session.query(Products).filter(Products.name.ilike(f'%{colname}%')).all()
+def _show_pos_list(category) -> tuple:
+    request = session.query(Products).filter(Products.category==category).all()
     return request
 
 def _add_to_cart(uid,id):
@@ -137,3 +135,11 @@ def delete_cart(uid):
         session.delete(raw)
     session.commit()
 
+def delete_products_for_test():
+    try:
+        request = session.query(Products).all()
+        for obj in request:
+            session.delete(obj)
+        session.commit()
+    except Exception as e:
+        print(e)

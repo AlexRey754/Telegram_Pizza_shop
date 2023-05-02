@@ -22,11 +22,33 @@ async def reg_adress(message: types.Message, state: FSMContext):
 @dp.callback_query_handler(text_contains='category',state='*')
 async def show_products_for_category(call:types.CallbackQuery):
     name = call.data[9:]
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.products_from_category(name))
+    await call.message.edit_text('Выберите продукт',reply_markup=keyboards.inline.products_from_category(name))
 
 @dp.callback_query_handler(text='back_to_menu',state='*')
 async def back_menu(call: types.CallbackQuery):
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.categories_keyboard())
+    await call.message.delete()
+    await call.message.answer('Выберите категорию',reply_markup=keyboards.inline.categories_keyboard())
+
+@dp.callback_query_handler(text_contains='item',state='*')
+async def show_item(call: types.CallbackQuery):
+    item_id = int(call.data[5:])
+    user_id = call.from_user.id
+    item = db.get_item(item_id)
+    img_path = f'./data/image/{item.img_name}'
+
+    text = f'''
+    <b> {item.name}</b>
+    {item.description}
+
+    Цена: <b>{item.price}</b>
+    '''
+    await call.message.delete()
+    try:
+        photo = open(img_path,'rb')
+        await call.message.answer_photo(photo=photo, caption=text,reply_markup=keyboards.inline.confirm_product(item.id))
+    except:
+        await call.message.answer(text=text,reply_markup=keyboards.inline.confirm_product(item.id))
+    
 
 @dp.callback_query_handler(text_contains='buy',state='*')
 async def buy_item(call: types.CallbackQuery):
@@ -73,12 +95,13 @@ async def make_purchase(call: types.CallbackQuery,state: FSMContext):
                            start_parameter='example',
                            payload='some_invoice')
     
-@dp.callback_query_handler(text='cancel')
-async def make_purchase(call: types.CallbackQuery):
+@dp.callback_query_handler(text='cancel',state='*')
+async def make_purchase(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
     await call.message.edit_reply_markup(reply_markup=None)
     await call.message.edit_text('Покупки сброшены')
     await call.message.answer('Меню',reply_markup=keyboards.default.menu)
+    await state.finish()
     db.delete_cart(uid)
 
 # Хендлер подтверждения оплаты
@@ -109,3 +132,4 @@ async def s_pay(message: types.Message):
 
     # Очистка корзины
     db.delete_cart(message.from_user.id)
+

@@ -1,11 +1,11 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from utils.db_api.db import _show_pos_list, _show_list_category
+from utils.db_api.db import _show_pos_list, _show_list_category,get_item
 
 buy = CallbackData('buy','item_id')
+item = CallbackData('item','item_id')
 category = CallbackData('category','category_name')
-
 
 purchase = InlineKeyboardMarkup(row_width=1)
 purchase.add(
@@ -16,6 +16,7 @@ purchase.add(
 
 
 def categories_keyboard():
+
     _list = _show_list_category()
     keyboard_inline_buttons = InlineKeyboardMarkup()
 
@@ -33,9 +34,18 @@ def products_from_category(name):
     _list = _show_pos_list(name)
     buttons_list = []
 
-    for item in _list:
-        buttons_list.append([InlineKeyboardButton(text=f'"{item.name}" {item.price} грн.', callback_data=buy.new(item_id=item.id))])
+    for product in _list:
+        buttons_list.append([InlineKeyboardButton(text=f'{product.name}', callback_data=item.new(item_id=product.id))])
 
     buttons_list.append([InlineKeyboardButton(text='Назад',callback_data='back_to_menu')])
     keyboard_inline_buttons = InlineKeyboardMarkup(inline_keyboard=buttons_list)
+    return keyboard_inline_buttons
+
+def confirm_product(id):
+
+    keyboard_inline_buttons = InlineKeyboardMarkup(row_width=1)
+    keyboard_inline_buttons.insert(
+            InlineKeyboardButton(text='Добавить в корзину', callback_data=buy.new(item_id=id))
+            )
+    keyboard_inline_buttons.insert(InlineKeyboardButton(text='Назад',callback_data='back_to_menu'))
     return keyboard_inline_buttons
