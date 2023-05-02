@@ -1,26 +1,149 @@
-from utils.db_api.db import add_position_to_db
+from utils.db_api.db import add_position_to_db, delete_products_for_test
 
-def upload_all():
-    add_position_to_db('Піца Канзас','Піца','Соус Барбекю, Моцарела, Цибуля, Ковбаски баварські, Кукурудза, Гриби','kanzas.jpg',231)
-    add_position_to_db('Піца Пепероні','Піца','Соус Барбекю, Моцарела, Помідори, Пепероні','peperoni.jpg',231)
-    add_position_to_db('Піца Манхеттен','Піца','Моцарела, Пепероні, Соус Альфредо, Гриби','manhetten.jpg',231)
-    add_position_to_db('Піца Шинка Та Гриби','Піца','Моцарела, Соус(майонез+кетчуп) , Гриби, Шинка','meatandmushrooms.jpg',231)
-    add_position_to_db('Піца Гриль','Піца','Болгарський перець, Курка, Соус Барбекю, Моцарела, Цибуля, Фрикадельки, Бекон','barbeque.jpg',231)
-    add_position_to_db('Піца Маргарита','Піца','Моцарела(x2), Соус','margarita.jpg',231)
-    add_position_to_db('Піца Карбонара','Піца','Моцарела, Соус, Цибуля, Гриби, Шинка, Бекон','karbonara.jpg',231)
-    add_position_to_db('Напій BonAqua Газована 0,5л','Напій','','bonaqua.jpg',38)
-    add_position_to_db('Напій Coca-Cola Zero 0,5л','Напій','','colazero.jpg',41)
-    add_position_to_db('Напій Coca-Cola 0,5л','Напій','','cola.jpg',41)
-    add_position_to_db('Напій Coca-Cola Zero Coffee 0,5л','Напій','','colazero.jpg',41)
-    add_position_to_db('Напій Fanta Апельсин 0,5л','Напій','','fanta.jpg',41)
-    add_position_to_db('Напій Sprite 0,5л','Напій','','sprite.jpg',41)
-    add_position_to_db('Напій Fuzetea 0,5л','Напій','','fuzetea.jpg',55)
-    add_position_to_db('Напій Schweppes Мохіто 0,5л','Напій','','schweppesmohito.jpg',55)
-    add_position_to_db('Напій Schweppes Індіан Тонік 0,5л','Напій','','schweppesindian.jpg',55)
-    add_position_to_db('Десерт Сіннамон Роли','Десерт','4шт Сінамона','sinamon.jpg',110)
-    add_position_to_db('Десерт Тірамісу','Десерт','300 г','tiramisu.jpg',110)
-    add_position_to_db('Десерт Шоколадний фондан','Десерт','97 г','fondan.jpg',110)
-    add_position_to_db('Десерт Лава Кейк','Десерт','96 г','lavacake.jpg',90)
-    add_position_to_db('Десерт Мафін Кокосовий','Десерт','80 г','mafincocoanut.jpg',90)
+products = [
+   {
+        'name' : 'Піца Канзас',
+        'category': 'Піца',
+        'description': 'Соус Барбекю, Моцарела, Цибуля, Ковбаски баварські, Кукурудза, Гриби',
+        'img_name': 'kanzas.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Пепероні',
+        'category': 'Піца',
+        'description': 'Соус Барбекю, Моцарела, Помідори, Пепероні',
+        'img_name': 'peperoni.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Манхеттен',
+        'category': 'Піца',
+        'description': 'Моцарела, Пепероні, Соус Альфредо, Гриби',
+        'img_name': 'manhetten.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Шинка Та Гриби',
+        'category': 'Піца',
+        'description': 'Моцарела, Соус(майонез+кетчуп), Гриби, Шинка',
+        'img_name': 'meatandmushrooms.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Гриль',
+        'category': 'Піца',
+        'description': 'Болгарський перець, Курка, Соус Барбекю, Моцарела, Цибуля, Фрикадельки, Бекон',
+        'img_name': 'barbeque.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Маргарита',
+        'category': 'Піца',
+        'description': 'Моцарела(x2), Соус',
+        'img_name': 'margarita.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Піца Карбонара',
+        'category': 'Піца',
+        'description': 'Моцарела, Соус, Цибуля, Гриби, Шинка, Бекон',
+        'img_name': 'karbonara.jpg',
+        'price': 231
+    },
+    {
+        'name' : 'Напій BonAqua Газована 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'bonaqua.jpg',
+        'price': 38
+    },
+    {
+        'name' : 'Напій Coca-Cola Zero 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'colazero.jpg',
+        'price': 41
+    },
+    {
+        'name' : 'Напій Fanta Апельсин 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'fanta.jpg',
+        'price': 41
+    },
+    {
+        'name' : 'Напій Sprite 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'sprite.jpg',
+        'price': 41
+    },
+    {
+        'name' : 'Напій Fuzetea 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'fuzetea.jpg',
+        'price': 55
+    },
+    {
+        'name' : 'Напій Schweppes Мохіто 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'schweppesmohito.jpg',
+        'price': 55
+    },
+    {
+        'name' : 'Напій Schweppes Індіан Тонік 0,5л',
+        'category': 'Напій',
+        'description': '',
+        'img_name': 'schweppesindian.jpg',
+        'price': 55
+    },
+    {
+        'name' : 'Десерт Сіннамон Роли',
+        'category': 'Десерт',
+        'description': '4шт Сінамона',
+        'img_name': 'sinamon.jpg',
+        'price': 110
+    },
+    {
+        'name' : 'Десерт Тірамісу',
+        'category': 'Десерт',
+        'description': '300 г',
+        'img_name': 'tiramisu.jpg',
+        'price': 110
+    },
+    {
+        'name' : 'Десерт Шоколадний фондан',
+        'category': 'Десерт',
+        'description': '97 г',
+        'img_name': 'fondan.jpg',
+        'price': 110
+    },
+    {
+        'name' : 'Десерт Лава Кейк',
+        'category': 'Десерт',
+        'description': '96 г',
+        'img_name': 'lavacake.jpg',
+        'price': 90
+    },
+    {
+        'name' : 'Десерт Мафін Кокосовий',
+        'category': 'Десерт',
+        'description': '80 г',
+        'img_name': 'mafincocoanut.jpg',
+        'price': 90
+    },  
+    
+]
 
-    print('DONE')
+def upload_all(reload=True):
+    if reload:
+        delete_products_for_test()
+        for product in products:
+            add_position_to_db(product)
+        print('Reload [ON]')
+
+    else:
+        print('Reload [OFF]')
+        return
