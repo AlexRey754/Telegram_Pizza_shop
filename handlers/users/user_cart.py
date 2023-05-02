@@ -16,25 +16,18 @@ async def reg_adress(message: types.Message, state: FSMContext):
     adress = message.text
     db.add_adress(uid,adress)
     await message.answer('Отлично!')
-    await message.answer('У нас есть следующие категории продукции',reply_markup=keyboards.inline.create_order)
+    await message.answer('У нас есть следующие категории продукции',reply_markup=keyboards.inline.categories_keyboard())
     await state.finish()
 
 
-@dp.callback_query_handler(text='pizza',state='*')
-async def show_pizzas(call:types.CallbackQuery):
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.create_dynamic_keyboard_for_order('Піца'))
-
-@dp.callback_query_handler(text='drink',state='*')
-async def show_drinks(call:types.CallbackQuery):
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.create_dynamic_keyboard_for_order('Напій'))
-
-@dp.callback_query_handler(text='dessert',state='*')
-async def show_desserts(call:types.CallbackQuery):
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.create_dynamic_keyboard_for_order('Десерт'))
+@dp.callback_query_handler(text_contains='category',state='*')
+async def show_products_for_category(call:types.CallbackQuery):
+    name = call.data[9:]
+    await call.message.edit_reply_markup(reply_markup=keyboards.inline.products_from_category(name))
 
 @dp.callback_query_handler(text='back_to_menu',state='*')
 async def back_menu(call: types.CallbackQuery):
-    await call.message.edit_reply_markup(reply_markup=keyboards.inline.create_order)
+    await call.message.edit_reply_markup(reply_markup=keyboards.inline.categories_keyboard())
 
 @dp.callback_query_handler(text_contains='buy',state='*')
 async def buy_item(call: types.CallbackQuery):
@@ -46,7 +39,6 @@ async def buy_item(call: types.CallbackQuery):
 @dp.callback_query_handler(text='cart',state='*')
 async def get_cart(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
-    
     data = db._list_order(uid)
     user_adress = db.get_adress(uid)
 
@@ -106,8 +98,10 @@ async def s_pay(message: types.Message):
     data = db._list_order(uid)
     user_adress = db.get_adress(uid)
     text = '<b>НОВЫЙ ЗАКАЗ</b>\n\n'
+
     for _, products in data:
         text = text + f'''{products.name}.\n'''
+        
     text += f'\n<b>Адрес</b>: {user_adress}'
     
     # отправка админам бота сообщения с заказом

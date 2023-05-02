@@ -100,6 +100,10 @@ def change_price(id, new_price):
 
     session.commit()   
 
+def _show_list_category() -> tuple:
+    request = session.query(Products.category).distinct(Products.category)
+    return request
+
 def _show_pos_list(colname) -> tuple:
     request = session.query(Products).filter(Products.name.ilike(f'%{colname}%')).all()
     return request

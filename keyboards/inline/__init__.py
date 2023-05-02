@@ -1,23 +1,17 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from utils.db_api.db import _show_pos_list
+from utils.db_api.db import _show_pos_list, _show_list_category
 
 buy = CallbackData('buy','item_id')
+category = CallbackData('category','category_name')
+# category = InlineKeyboardMarkup()
+# category.add(
+#     InlineKeyboardButton('Піца',callback_data='pizza'),
+#     InlineKeyboardButton('Напої',callback_data='drink'),
+#     InlineKeyboardButton('Десерти',callback_data='dessert'),
 
-create_order = InlineKeyboardMarkup()
-create_order.add(
-    InlineKeyboardButton('Піца',callback_data='pizza'),
-    InlineKeyboardButton('Напої',callback_data='drink'),
-    InlineKeyboardButton('Десерти',callback_data='dessert'),
-
-)
-create_order.add(
-    InlineKeyboardButton('Корзина',callback_data='cart'),
-)
-create_order.add(
-    InlineKeyboardButton('❌Отменить заказ',callback_data='cancel'),
-)
+# )
 
 purchase = InlineKeyboardMarkup(row_width=1)
 purchase.add(
@@ -27,7 +21,20 @@ purchase.add(
 )
 
 
-def create_dynamic_keyboard_for_order(name):
+def categories_keyboard():
+    _list = _show_list_category()
+    keyboard_inline_buttons = InlineKeyboardMarkup()
+
+    for item in _list:
+        keyboard_inline_buttons.insert(
+            InlineKeyboardButton(text=f'{item.category}', callback_data=category.new(category_name=item.category))
+            )
+    keyboard_inline_buttons.add(InlineKeyboardButton('Корзина',callback_data='cart'))
+    keyboard_inline_buttons.add(InlineKeyboardButton('❌Отменить заказ',callback_data='cancel'))
+
+    return keyboard_inline_buttons
+
+def products_from_category(name):
 
     _list = _show_pos_list(name)
     buttons_list = []
