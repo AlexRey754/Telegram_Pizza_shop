@@ -28,12 +28,14 @@ class Products(Base):
     name = Column(String)
     category = Column(String)
     description = Column(String)
-    img = Column(BLOB)
+    img_name = Column(String)
     price = Column(Integer)  
 
-    def __init__(self, name, description, price):
+    def __init__(self, name,category, description, img_name, price):
         self.name = name
+        self.category = category
         self.description = description
+        self.img_name = img_name
         self.price = price    
 
 class Order(Base):
@@ -45,16 +47,6 @@ class Order(Base):
     def __init__(self,user_id,product_id):
         self.user_id = user_id
         self.product_id = product_id
-
-# class Adress(Base):
-#     __tablename__ = 'adress'
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     user_id = Column(Integer)
-#     adress = Column(String)
-
-#     def __init__(self,user_id,adress):
-#         self.user_id = user_id
-#         self.adress = adress
 
 engine = create_engine('sqlite:///.\db.db', echo=False)
 Session = sessionmaker(bind=engine)
@@ -88,9 +80,9 @@ def check_user_registration(row_uid:int):
     except:
         return False
     
-def add_position_to_db(name, description, price):
+def add_position_to_db(name, category, description, img_name, price):
 
-    request = Products(name, description, price)
+    request = Products(name, category, description, img_name, price)
     session.add(request)
     session.commit()
 
@@ -130,16 +122,6 @@ def add_adress(raw_uid,raw_adress):
 def get_adress(uid):
     data = session.query(User).filter(User.uid==uid).first()
     return data.adress
-
-# def del_adress(uid):
-#     try:
-#         request = session.query(Adress).filter_by(user_id=uid).all()
-#         for raw in request:
-#             session.delete(raw)
-#     except:
-#         return
-   
-#     session.commit()
 
 def delete_cart(uid):
     try:
