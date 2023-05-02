@@ -5,13 +5,7 @@ from utils.db_api.db import _show_pos_list, _show_list_category
 
 buy = CallbackData('buy','item_id')
 category = CallbackData('category','category_name')
-# category = InlineKeyboardMarkup()
-# category.add(
-#     InlineKeyboardButton('Піца',callback_data='pizza'),
-#     InlineKeyboardButton('Напої',callback_data='drink'),
-#     InlineKeyboardButton('Десерти',callback_data='dessert'),
 
-# )
 
 purchase = InlineKeyboardMarkup(row_width=1)
 purchase.add(

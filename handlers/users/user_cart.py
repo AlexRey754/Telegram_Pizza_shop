@@ -19,7 +19,6 @@ async def reg_adress(message: types.Message, state: FSMContext):
     await message.answer('У нас есть следующие категории продукции',reply_markup=keyboards.inline.categories_keyboard())
     await state.finish()
 
-
 @dp.callback_query_handler(text_contains='category',state='*')
 async def show_products_for_category(call:types.CallbackQuery):
     name = call.data[9:]
@@ -101,7 +100,7 @@ async def s_pay(message: types.Message):
 
     for _, products in data:
         text = text + f'''{products.name}.\n'''
-        
+
     text += f'\n<b>Адрес</b>: {user_adress}'
     
     # отправка админам бота сообщения с заказом
