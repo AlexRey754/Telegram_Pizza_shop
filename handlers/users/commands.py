@@ -27,10 +27,14 @@ async def admin_check(message: types.Message):
 
     uid = str(message.from_user.id)
     if uid in ADMINS:
-        await message.answer('Ваш ID был зарегестрирован с правами администратора',reply_markup=keyboards.default.settings)
+        await message.answer('Ваш ID был зарегестрирован с правами администратора',reply_markup=keyboards.default.settings) 
     else:
         await message.answer('У вас недостаточно прав для использования данной команды')
 
+@dp.message_handler(Command('test'))
+async def test(message: types.Message):
+    uid = str(message.from_user.id)
+    await message.answer('Тестовая функция',reply_markup=keyboards.inline.categories_keyboard())
 
 @dp.message_handler(Command('help'))
 async def bot_help(message: types.Message):
