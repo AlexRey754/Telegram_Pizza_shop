@@ -12,7 +12,8 @@ async def on_startup(dispatcher):
     await set_default_commands(dispatcher)
 
     ''' Откомментировать для заполнения базы'''
-    upload_all(False)
+    upload_all(True)
+
 if __name__ == '__main__':
     db.create_db()
     executor.start_polling(dp, on_startup=on_startup)

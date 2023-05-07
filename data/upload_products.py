@@ -51,84 +51,84 @@ products = [
         'price': 231
     },
     {
-        'name' : 'Напій BonAqua Газована 0,5л',
+        'name' : 'BonAqua Газована 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'bonaqua.jpg',
         'price': 38
     },
     {
-        'name' : 'Напій Coca-Cola Zero 0,5л',
+        'name' : 'Coca-Cola Zero 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'colazero.jpg',
         'price': 41
     },
     {
-        'name' : 'Напій Fanta Апельсин 0,5л',
+        'name' : 'Fanta Апельсин 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'fanta.jpg',
         'price': 41
     },
     {
-        'name' : 'Напій Sprite 0,5л',
+        'name' : 'Sprite 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'sprite.jpg',
         'price': 41
     },
     {
-        'name' : 'Напій Fuzetea 0,5л',
+        'name' : 'Fuzetea 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'fuzetea.jpg',
         'price': 55
     },
     {
-        'name' : 'Напій Schweppes Мохіто 0,5л',
+        'name' : 'Schweppes Мохіто 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'schweppesmohito.jpg',
         'price': 55
     },
     {
-        'name' : 'Напій Schweppes Індіан Тонік 0,5л',
+        'name' : 'Schweppes Індіан Тонік 0,5л',
         'category': 'Напій',
         'description': '',
         'img_name': 'schweppesindian.jpg',
         'price': 55
     },
     {
-        'name' : 'Десерт Сіннамон Роли',
+        'name' : 'Сіннамон Роли',
         'category': 'Десерт',
         'description': '4шт Сінамона',
         'img_name': 'sinamon.jpg',
         'price': 110
     },
     {
-        'name' : 'Десерт Тірамісу',
+        'name' : 'Тірамісу',
         'category': 'Десерт',
         'description': '300 г',
         'img_name': 'tiramisu.jpg',
         'price': 110
     },
     {
-        'name' : 'Десерт Шоколадний фондан',
+        'name' : 'Шоколадний фондан',
         'category': 'Десерт',
         'description': '97 г',
         'img_name': 'fondan.jpg',
         'price': 110
     },
     {
-        'name' : 'Десерт Лава Кейк',
+        'name' : 'Лава Кейк',
         'category': 'Десерт',
         'description': '96 г',
         'img_name': 'lavacake.jpg',
         'price': 90
     },
     {
-        'name' : 'Десерт Мафін Кокосовий',
+        'name' : 'Мафін Кокосовий',
         'category': 'Десерт',
         'description': '80 г',
         'img_name': 'mafincocoanut.jpg',
@@ -147,3 +147,4 @@ def upload_all(reload=True):
     else:
         print('Reload [OFF]')
         return
+    

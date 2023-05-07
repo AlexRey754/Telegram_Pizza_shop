@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine,update
+from sqlalchemy import and_, create_engine, distinct, func,update
 from sqlalchemy.orm import sessionmaker
 
 
-from sqlalchemy import Column, Integer,String, BLOB, ForeignKey
+from sqlalchemy import Column, Integer,String, ForeignKey
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
@@ -38,8 +38,8 @@ class Products(Base):
         self.img_name = img_name
         self.price = price    
 
-class Order(Base):
-    __tablename__ = 'order'
+class Orders(Base):
+    __tablename__ = 'orders'
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer)
     product_id = Column(Integer,ForeignKey('products.id'))
@@ -87,10 +87,10 @@ def add_position_to_db(kwargs):
     session.commit()
 
 def show_all_position():
-    text = 'id | НАЗВАНИЕ | ЦЕНА\n'
+    text = ' НАЗВАНИЕ | ЦЕНА\n'
     request = session.query(Products).order_by(Products.category).all()
     for raw in request:
-        text = text + f'{raw.id}| {raw.name} | {raw.price} UAH \n'
+        text = text + f'{raw.name} | {raw.price} UAH \n'
 
     return text
 
@@ -107,12 +107,12 @@ def _show_pos_list(category) -> tuple:
     return request
 
 def _add_to_cart(uid,id):
-    request = Order(uid,id)
+    request = Orders(uid,id)
     session.add(request)
     session.commit()
 
 def _list_order(uid) -> tuple:
-    data = session.query(Order,Products).join(Products).filter(Order.user_id==uid).all()
+    data = session.query(Orders,Products).join(Products).filter(Orders.user_id==uid).group_by(Orders.product_id).all()
     return data
 
 def add_adress(raw_uid,raw_adress):
@@ -121,18 +121,28 @@ def add_adress(raw_uid,raw_adress):
     session.execute(request)
     session.commit()
 
-def get_adress(uid):
+def get_user(uid):
     data = session.query(User).filter(User.uid==uid).first()
-    return data.adress
+    return data
+
+def get_count_in_order(uid,item_id):
+    request = session.query(func.count(Orders.product_id)).filter(and_(Orders.product_id==item_id, Orders.user_id==uid))
+    return request[0][0]
 
 def delete_cart(uid):
     try:
-        request = session.query(Order).filter_by(user_id=uid).all()
+        request = session.query(Orders).filter_by(user_id=uid).all()
 
     except Exception as e:
         print(e)
     for raw in request:
         session.delete(raw)
+    session.commit()
+
+def delete_product_from_order(product_id,user_id):
+
+    request = session.query(Orders).filter(and_(Orders.product_id==product_id,Orders.user_id==user_id)).first()
+    session.delete(request)
     session.commit()
 
 def delete_products_for_test():

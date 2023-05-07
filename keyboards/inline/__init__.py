@@ -10,7 +10,9 @@ category = CallbackData('category','category_name')
 purchase = InlineKeyboardMarkup(row_width=1)
 purchase.add(
     InlineKeyboardButton('Подтвердить',callback_data='purchase'),
-    InlineKeyboardButton('Сбросить',callback_data='cancel')
+    InlineKeyboardButton('Сбросить',callback_data='cancel'),
+    InlineKeyboardButton('Назад',callback_data='back_to_menu'),
+
 
 )
 
@@ -47,5 +49,5 @@ def confirm_product(id):
     keyboard_inline_buttons.insert(
             InlineKeyboardButton(text='Добавить в корзину', callback_data=buy.new(item_id=id))
             )
-    keyboard_inline_buttons.insert(InlineKeyboardButton(text='Назад',callback_data='back_to_menu'))
+    keyboard_inline_buttons.insert(InlineKeyboardButton(text='Назад',callback_data='back_to_menu_from_product'))
     return keyboard_inline_buttons

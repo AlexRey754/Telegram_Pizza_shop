@@ -1,7 +1,7 @@
 import keyboards
 
 from aiogram import types
-from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher import FSMContext, filters
 
 from loader import dp,bot
 from utils.db_api import db
@@ -26,13 +26,17 @@ async def show_products_for_category(call:types.CallbackQuery):
 
 @dp.callback_query_handler(text='back_to_menu',state='*')
 async def back_menu(call: types.CallbackQuery):
+    await call.message.edit_text('Выберите категорию',reply_markup=keyboards.inline.categories_keyboard())
+
+@dp.callback_query_handler(text='back_to_menu_from_product',state='*')
+async def back_menu(call: types.CallbackQuery):
+    # т.к нельзя редактировать сообщение с отправленой картинкой
     await call.message.delete()
     await call.message.answer('Выберите категорию',reply_markup=keyboards.inline.categories_keyboard())
 
 @dp.callback_query_handler(text_contains='item',state='*')
 async def show_item(call: types.CallbackQuery):
     item_id = int(call.data[5:])
-    user_id = call.from_user.id
     item = db.get_item(item_id)
     img_path = f'./data/image/{item.img_name}'
 
@@ -49,7 +53,6 @@ async def show_item(call: types.CallbackQuery):
     except:
         await call.message.answer(text=text,reply_markup=keyboards.inline.confirm_product(item.id))
     
-
 @dp.callback_query_handler(text_contains='buy',state='*')
 async def buy_item(call: types.CallbackQuery):
     item_id = int(call.data[4:])
@@ -61,17 +64,19 @@ async def buy_item(call: types.CallbackQuery):
 async def get_cart(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
     data = db._list_order(uid)
-    user_adress = db.get_adress(uid)
+    user = db.get_user(uid)
 
     if data:
         text = ''
         sum = 0
         for _, products in data:
-            sum += products.price
-            text = text + f'''{products.name} - {products.price} грн.\n'''
-        text += f'\nАдрес: {user_adress}'
+                item_count = db.get_count_in_order(uid,products.id)
+                sum += products.price * item_count
+                text = text + f'''{products.name} (<b>x{item_count}</b>) - {products.price} грн | /del{products.id}\n'''
+        text += f'\nАдрес: {user.adress}'
         text += f'\n\n Итого: {sum} грн.'
-        await call.message.answer(text,reply_markup=keyboards.inline.purchase)
+        await call.message.edit_text(text,reply_markup=keyboards.inline.purchase)
+
     else:
         await call.answer('Вы еще ничего не выбрали')
 
@@ -96,7 +101,7 @@ async def make_purchase(call: types.CallbackQuery,state: FSMContext):
                            payload='some_invoice')
     
 @dp.callback_query_handler(text='cancel',state='*')
-async def make_purchase(call: types.CallbackQuery,state: FSMContext):
+async def cancel_purchase(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
     await call.message.edit_reply_markup(reply_markup=None)
     await call.message.edit_text('Покупки сброшены')
@@ -118,14 +123,18 @@ async def s_pay(message: types.Message):
 
     # Генерация сообщения админам бота
     data = db._list_order(uid)
-    user_adress = db.get_adress(uid)
+    user = db.get_user(uid)
     text = '<b>НОВЫЙ ЗАКАЗ</b>\n\n'
-
+    sum = 0
     for _, products in data:
-        text = text + f'''{products.name}.\n'''
+        item_count = db.get_count_in_order(uid,products.id)
+        sum += products.price * item_count
+        text = text + f'''{products.name} <b>x{item_count}</b>'''
 
-    text += f'\n<b>Адрес</b>: {user_adress}'
-    
+    text += f'\n<b>Адрес</b>: {user.adress}'
+    text += f'\n<b>ФИО</b>: {user.name}'
+
+    text += f'\n\n Итого: {sum} грн.'
     # отправка админам бота сообщения с заказом
     for admin_uid in ADMINS:
         await bot.send_message(admin_uid,text)
