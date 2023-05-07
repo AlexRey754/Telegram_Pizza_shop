@@ -125,6 +125,24 @@ def get_user(uid):
     data = session.query(User).filter(User.uid==uid).first()
     return data
 
+def get_user_cart(uid):
+    data = _list_order(uid)
+    user = get_user(uid)
+
+    if data:
+        text = ''
+        sum = 0
+        for _, products in data:
+                item_count = get_count_in_order(uid,products.id)
+                sum += products.price * item_count
+                text = text + f'''{products.name} (<b>x{item_count}</b>) - {products.price} грн | /del{products.id}\n'''
+        text += f'\nАдрес: {user.adress}'
+        text += f'\n\n Итого: {sum} грн.'
+    
+    else:
+        return
+    return text
+
 def get_count_in_order(uid,item_id):
     request = session.query(func.count(Orders.product_id)).filter(and_(Orders.product_id==item_id, Orders.user_id==uid))
     return request[0][0]

@@ -63,20 +63,10 @@ async def buy_item(call: types.CallbackQuery):
 @dp.callback_query_handler(text='cart',state='*')
 async def get_cart(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
-    data = db._list_order(uid)
-    user = db.get_user(uid)
+    cart = db.get_user_cart(uid)
 
-    if data:
-        text = ''
-        sum = 0
-        for _, products in data:
-                item_count = db.get_count_in_order(uid,products.id)
-                sum += products.price * item_count
-                text = text + f'''{products.name} (<b>x{item_count}</b>) - {products.price} грн | /del{products.id}\n'''
-        text += f'\nАдрес: {user.adress}'
-        text += f'\n\n Итого: {sum} грн.'
-        await call.message.edit_text(text,reply_markup=keyboards.inline.purchase)
-
+    if cart:
+        await call.message.edit_text(cart,reply_markup=keyboards.inline.purchase)
     else:
         await call.answer('Вы еще ничего не выбрали')
 

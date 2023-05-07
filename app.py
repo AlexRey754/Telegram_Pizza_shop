@@ -11,7 +11,10 @@ async def on_startup(dispatcher):
 
     await set_default_commands(dispatcher)
 
-    ''' Откомментировать для заполнения базы'''
+    ''' 
+    True - Перезаписать продукты из файла
+    False - Не перезаписывать
+    '''
     upload_all(True)
 
 if __name__ == '__main__':
