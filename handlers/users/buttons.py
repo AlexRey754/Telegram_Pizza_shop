@@ -28,7 +28,7 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
             await message.answer('Введите адрес доставки в формате [город][улица][дом\квартира]',reply_markup=types.ReplyKeyboardRemove())
             await OrderState.adress.set()
 
-        case '📋Список всех позиций по группам':
+        case '📋Список заказов':
             try:
                 row_text = db.show_all_position()
                 await message.answer(row_text)
