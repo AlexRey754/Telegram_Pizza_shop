@@ -1,6 +1,7 @@
+import datetime
+
 from sqlalchemy import and_, create_engine, distinct, func,update
 from sqlalchemy.orm import sessionmaker
-
 
 from sqlalchemy import Column, Integer,String, ForeignKey
 from sqlalchemy.orm import declarative_base
@@ -120,6 +121,10 @@ def get_item(id):
     request = session.query(Products).filter(Products.id==id).first()
     return request
 
+def get_order_sort(date,time):
+    request = session.query(Orders).filter(and_(Orders.date==date,Orders.time==time)).group_by(Orders.product_name).all()
+    return request
+
 def _show_list_category() -> tuple:
     request = session.query(Products.category).distinct(Products.category)
     return request
@@ -153,7 +158,7 @@ def get_user(uid):
     data = session.query(User).filter(User.uid==uid).first()
     return data
 
-def get_user_cart(uid):
+def generate_user_cart(uid):
     data = _list_order_sort(uid)
     user = get_user(uid)
 
@@ -161,7 +166,7 @@ def get_user_cart(uid):
         text = ''
         sum = 0
         for _, products in data:
-                item_count = get_count_in_order(uid,products.id)
+                item_count = get_count_in_cart(uid,products.id)
                 sum += products.price * item_count
                 text = text + f'''{products.name} (<b>x{item_count}</b>) - {products.price} грн | /del{products.id}\n'''
         text += f'\nАдрес: {user.adress}'
@@ -171,8 +176,64 @@ def get_user_cart(uid):
         return
     return text
 
-def get_count_in_order(uid,item_id):
+def generate_order_to_admin(uid):
+    data = _list_order_sort(uid)
+    user = get_user(uid)
+
+    text = '<b>НОВЫЙ ЗАКАЗ</b>\n\n'
+
+    sum = 0
+    for _, products in data:
+        item_count = get_count_in_cart(uid,products.id)
+        sum += products.price * item_count
+        text = text + f'''{products.name} <b>x{item_count}</b>\n'''
+
+    text += f'\n<b>Адрес</b>: {user.adress}'
+    text += f'\n<b>ФИО</b>: {user.name}'
+
+    text += f'\n\n Итого: {sum} грн.'
+    return text
+
+def generate_dates_list():
+    row_data = show_order_dates()
+    text = ''
+    count = 1
+    for data in row_data:
+        row_date = data.date.replace('-','_')
+        text += f'{count}){data.date} /see_{row_date}\n'
+        count += 1
+
+    return text
+
+def generate_orders_list(date,raw_date):
+    orders = show_orders_from_date(date)
+    text = ''
+    count = 1
+    for order in orders:
+        raw_time = order.time.replace(':','_')
+        text += f'{count}) {order.adress} [{order.time}] /order_{raw_date}_{raw_time}\n'
+        count += 1
+    return text
+
+def generate_current_order(date,time):
+    text = f'Заказ на {date} [{time}]\n\n'
+    raw_data = get_order_sort(date,time)
+    sum = 0
+    for data in raw_data:
+        item_count = get_count_in_order(data.product_name,date,time)
+        sum = data.price * item_count
+        text += f'{data.product_name} (x{item_count})\n'
+    text += f'\nИтого: {sum} грн'
+    return text
+
+def get_count_in_cart(uid,item_id):
     request = session.query(func.count(Cart.product_id)).filter(and_(Cart.product_id==item_id, Cart.user_id==uid))
+    return request[0][0]
+
+def get_count_in_order(product_name,date,time):
+    request = session.query(func.count(Orders.product_name)).filter(and_(Orders.product_name==product_name, 
+                                                                            and_(Orders.date==date,
+                                                                                and_(Orders.time==time))))
     return request[0][0]
 
 def delete_cart(uid):
@@ -185,22 +246,35 @@ def delete_cart(uid):
         session.delete(raw)
     session.commit()
 
-def delete_product_from_order(product_id,user_id):
+def delete_product_from_cart(product_id,user_id):
 
     request = session.query(Cart).filter(and_(Cart.product_id==product_id,Cart.user_id==user_id)).first()
     session.delete(request)
     session.commit()
 
-def add_order(username,adress,product_name,price,date,time):
-    request = Orders(username,adress,product_name,price,date,time)
-    session.add(request)
+def add_order(uid):
+    data = _list_order(uid)
+    user = get_user(uid)
+    date = datetime.datetime.now().strftime('%d-%m-%Y')
+    time = datetime.datetime.now().strftime('%H:%M')
+
+    for _, products in data:
+
+        username = user.name
+        adress = user.adress
+        product_name = products.name
+        price = products.price
+    
+        request = Orders(username,adress,product_name,price,date,time)
+        session.add(request)
     session.commit()
 
-def show_order_dates():
-    return session.query(Orders).all().date
-
 def show_orders_from_date(date):
-    return session.query(Orders).filter(Orders.date==date).all()
+    request = session.query(Orders).filter(Orders.date==date).group_by(Orders.time).all()
+    return request
+
+def show_order_dates():
+    return session.query(Orders).group_by(Orders.date).all()
 
 def delete_products_for_test():
     try:

@@ -63,7 +63,7 @@ async def buy_item(call: types.CallbackQuery):
 @dp.callback_query_handler(text='cart',state='*')
 async def get_cart(call: types.CallbackQuery,state: FSMContext):
     uid = call.from_user.id
-    cart = db.get_user_cart(uid)
+    cart = db.generate_user_cart(uid)
 
     if cart:
         await call.message.edit_text(cart,reply_markup=keyboards.inline.purchase)
@@ -110,25 +110,15 @@ async def s_pay(message: types.Message):
     uid = message.from_user.id
     await bot.send_message(message.chat.id, 'Платеж прошел успешно!!!',reply_markup=keyboards.default.menu)
 
-
     # Генерация сообщения админам бота
-    data = db._list_order(uid)
-    user = db.get_user(uid)
-    text = '<b>НОВЫЙ ЗАКАЗ</b>\n\n'
-    sum = 0
-    for _, products in data:
-        item_count = db.get_count_in_order(uid,products.id)
-        sum += products.price * item_count
-        text = text + f'''{products.name} <b>x{item_count}</b>'''
+    order = db.generate_order_to_admin(uid)
 
-    text += f'\n<b>Адрес</b>: {user.adress}'
-    text += f'\n<b>ФИО</b>: {user.name}'
-
-    text += f'\n\n Итого: {sum} грн.'
     # отправка админам бота сообщения с заказом
     for admin_uid in ADMINS:
-        await bot.send_message(admin_uid,text)
+        await bot.send_message(admin_uid, order)
 
+    # добавление в таблицу заказов
+    db.add_order(uid)
     # Очистка корзины
     db.delete_cart(message.from_user.id)
 

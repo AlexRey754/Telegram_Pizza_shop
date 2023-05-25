@@ -14,13 +14,29 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
     if message.text.startswith('/del'):
         uid = message.from_user.id
         item_id = message.text[4:]
-        db.delete_product_from_order(item_id,uid) 
+        db.delete_product_from_cart(item_id,uid) 
         cart = db.get_user_cart(uid)
 
         if cart:
             await message.answer(cart,reply_markup=keyboards.inline.purchase)
         else:
             await message.answer('Корзина пуста')
+
+    elif message.text.startswith('/see_'):
+        try:
+            raw_date = message.text[5:]
+            date = raw_date.replace('_','-')
+            text = db.generate_orders_list(date,raw_date)
+            await message.answer(text)
+        except:
+            await message.answer('Нет записей по этому дню')
+
+    elif message.text.startswith('/order'):
+        raw_data = message.text[7:]
+        date = raw_data[:10].replace('_','-')
+        time = raw_data[11::].replace('_',':')
+        text = db.generate_current_order(date, time)
+        await message.answer(text)
 
     match message.text:
         case '➕Сделать заказ':
@@ -30,8 +46,8 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
 
         case '📋Список заказов':
             try:
-                row_text = db.show_all_position()
-                await message.answer(row_text)
+                text = db.generate_dates_list()
+                await message.answer(text)
             except:
                 await message.answer('Пока нет позиций в базе')
 
