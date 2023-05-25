@@ -38,8 +38,8 @@ class Products(Base):
         self.img_name = img_name
         self.price = price    
 
-class Orders(Base):
-    __tablename__ = 'orders'
+class Cart(Base):
+    __tablename__ = 'cart'
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer)
     product_id = Column(Integer,ForeignKey('products.id'))
@@ -47,6 +47,28 @@ class Orders(Base):
     def __init__(self,user_id,product_id):
         self.user_id = user_id
         self.product_id = product_id
+
+class Orders(Base):
+    __tablename__ = 'orders'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String)
+    adress = Column(String)
+    product_name = Column(String)
+    price = Column(Integer)
+    date = Column(String)
+    time = Column(String)
+    status = Column(String)
+
+    def __init__(self,username,adress,product_name,price,date,time,status='Оплачен'):
+        self.username = username
+        self.adress = adress
+        self.product_name = product_name
+        self.price = price
+        self.date = date
+        self.time = time
+        self.status = status
+
 
 engine = create_engine('sqlite:///.\db.db', echo=False)
 Session = sessionmaker(bind=engine)
@@ -107,12 +129,18 @@ def _show_pos_list(category) -> tuple:
     return request
 
 def _add_to_cart(uid,id):
-    request = Orders(uid,id)
+    request = Cart(uid,id)
     session.add(request)
     session.commit()
 
+# для генерации окна оплаты
 def _list_order(uid) -> tuple:
-    data = session.query(Orders,Products).join(Products).filter(Orders.user_id==uid).group_by(Orders.product_id).all()
+    data = session.query(Cart,Products).join(Products).filter(Cart.user_id==uid).all()
+    return data
+
+# для генерации окна корзины
+def _list_order_sort(uid) -> tuple:
+    data = session.query(Cart,Products).join(Products).filter(Cart.user_id==uid).group_by(Cart.product_id).all()
     return data
 
 def add_adress(raw_uid,raw_adress):
@@ -126,7 +154,7 @@ def get_user(uid):
     return data
 
 def get_user_cart(uid):
-    data = _list_order(uid)
+    data = _list_order_sort(uid)
     user = get_user(uid)
 
     if data:
@@ -144,12 +172,12 @@ def get_user_cart(uid):
     return text
 
 def get_count_in_order(uid,item_id):
-    request = session.query(func.count(Orders.product_id)).filter(and_(Orders.product_id==item_id, Orders.user_id==uid))
+    request = session.query(func.count(Cart.product_id)).filter(and_(Cart.product_id==item_id, Cart.user_id==uid))
     return request[0][0]
 
 def delete_cart(uid):
     try:
-        request = session.query(Orders).filter_by(user_id=uid).all()
+        request = session.query(Cart).filter_by(user_id=uid).all()
 
     except Exception as e:
         print(e)
@@ -159,9 +187,20 @@ def delete_cart(uid):
 
 def delete_product_from_order(product_id,user_id):
 
-    request = session.query(Orders).filter(and_(Orders.product_id==product_id,Orders.user_id==user_id)).first()
+    request = session.query(Cart).filter(and_(Cart.product_id==product_id,Cart.user_id==user_id)).first()
     session.delete(request)
     session.commit()
+
+def add_order(username,adress,product_name,price,date,time):
+    request = Orders(username,adress,product_name,price,date,time)
+    session.add(request)
+    session.commit()
+
+def show_order_dates():
+    return session.query(Orders).all().date
+
+def show_orders_from_date(date):
+    return session.query(Orders).filter(Orders.date==date).all()
 
 def delete_products_for_test():
     try:
