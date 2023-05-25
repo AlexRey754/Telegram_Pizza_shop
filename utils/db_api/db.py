@@ -196,7 +196,7 @@ def generate_order_to_admin(uid):
 
 def generate_dates_list():
     row_data = show_order_dates()
-    text = ''
+    text = 'Дни, когда были совершены заказы\n\n'
     count = 1
     for data in row_data:
         row_date = data.date.replace('-','_')
@@ -207,7 +207,7 @@ def generate_dates_list():
 
 def generate_orders_list(date,raw_date):
     orders = show_orders_from_date(date)
-    text = ''
+    text = f'Заказы на {date[:5]}\n\n'
     count = 1
     for order in orders:
         raw_time = order.time.replace(':','_')
