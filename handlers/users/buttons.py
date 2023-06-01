@@ -15,7 +15,7 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
         uid = message.from_user.id
         item_id = message.text[4:]
         db.delete_product_from_cart(item_id,uid) 
-        cart = db.get_user_cart(uid)
+        cart = db.generate_user_cart(uid)
 
         if cart:
             await message.answer(cart,reply_markup=keyboards.inline.purchase)
