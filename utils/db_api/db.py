@@ -42,7 +42,7 @@ class Products(Base):
 class Orders(Base):
     __tablename__ = 'orders'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer)
+    user_id = Column(Integer,ForeignKey('user.id'))
     product_id = Column(Integer,ForeignKey('products.id'))
     adress = Column(String)
     date = Column(String)
