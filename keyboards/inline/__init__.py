@@ -9,13 +9,17 @@ category = CallbackData('category','category_name')
 
 purchase = InlineKeyboardMarkup(row_width=1)
 purchase.add(
-    InlineKeyboardButton('Подтвердить',callback_data='purchase'),
+    InlineKeyboardButton('Добавить Адрес доставки',callback_data='add_adress'),
     InlineKeyboardButton('Сбросить',callback_data='cancel'),
     InlineKeyboardButton('Назад',callback_data='back_to_menu'),
 
 
 )
 
+purchase_complete = InlineKeyboardMarkup(row_width=1)
+purchase_complete.add(
+    InlineKeyboardButton('Перейти к оплате',callback_data='purchase'),
+)
 
 def categories_keyboard():
 

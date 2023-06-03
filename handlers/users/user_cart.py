@@ -9,16 +9,6 @@ from data.config import ADMINS,PAYMENT_TOKEN
 
 from states import OrderState
 
-
-@dp.message_handler(state=OrderState.adress)
-async def reg_adress(message: types.Message, state: FSMContext):
-    uid = message.from_user.id
-    adress = message.text
-    db.add_adress(uid,adress)
-    await message.answer('Отлично!')
-    await message.answer('У нас есть следующие категории продукции',reply_markup=keyboards.inline.categories_keyboard())
-    await state.finish()
-
 @dp.callback_query_handler(text_contains='category',state='*')
 async def show_products_for_category(call:types.CallbackQuery):
     name = call.data[9:]
@@ -44,7 +34,9 @@ async def show_item(call: types.CallbackQuery):
     <b> {item.name}</b>
     {item.description}
 
-    Цена: <b>{item.price}</b>
+    Статус: {item.status}
+    Цена: <b>{item.price} грн</b>
+    
     '''
     await call.message.delete()
     try:
@@ -70,14 +62,26 @@ async def get_cart(call: types.CallbackQuery,state: FSMContext):
     else:
         await call.answer('Вы еще ничего не выбрали')
 
+@dp.callback_query_handler(text='add_adress',state='*')
+async def add_adress(call: types.CallbackQuery,state: FSMContext):
+    await OrderState.adress.set()
+    await call.message.answer('Введите адрес доставки в формате [город][улица][дом\квартира]',reply_markup=types.ReplyKeyboardRemove())
+
+@dp.message_handler(state=OrderState.adress)
+async def reg_adress(message: types.Message, state: FSMContext):
+    uid = message.from_user.id
+    adress = message.text
+    db.add_adress(uid,adress)
+    await message.reply('Принято',reply_markup=keyboards.inline.purchase_complete)
+    await OrderState.purchase.set()
+
 @dp.callback_query_handler(text='purchase',state='*')
 async def make_purchase(call: types.CallbackQuery,state: FSMContext):
-
-
     await call.message.edit_reply_markup(reply_markup=None)
     uid = call.from_user.id
 
     data = db._list_order(uid)
+
     prices = [types.LabeledPrice(label=i.name, amount=i.price*100) for _,i in data]
 
     await bot.send_invoice(uid,
@@ -89,6 +93,7 @@ async def make_purchase(call: types.CallbackQuery,state: FSMContext):
                            prices=prices,
                            start_parameter='example',
                            payload='some_invoice')
+    await state.finish()
     
 @dp.callback_query_handler(text='cancel',state='*')
 async def cancel_purchase(call: types.CallbackQuery,state: FSMContext):
@@ -108,6 +113,7 @@ async def checkout_process(pre_checkout_query: types.PreCheckoutQuery):
 async def s_pay(message: types.Message):
     # Отправка пользователю подтверждения об оплате
     uid = message.from_user.id
+    db.update_cart_status_and_datetime(uid)
     await bot.send_message(message.chat.id, 'Платеж прошел успешно!!!',reply_markup=keyboards.default.menu)
 
     # Генерация сообщения админам бота
@@ -115,10 +121,12 @@ async def s_pay(message: types.Message):
 
     # отправка админам бота сообщения с заказом
     for admin_uid in ADMINS:
+
+        # await bot.send_message(admin_uid, text)
         await bot.send_message(admin_uid, order)
 
-    # добавление в таблицу заказов
-    db.add_order(uid)
-    # Очистка корзины
-    db.delete_cart(message.from_user.id)
+
+
+
+
 

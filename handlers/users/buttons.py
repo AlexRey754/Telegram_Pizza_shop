@@ -40,9 +40,8 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
 
     match message.text:
         case '➕Сделать заказ':
-            await state.finish()
-            await message.answer('Введите адрес доставки в формате [город][улица][дом\квартира]',reply_markup=types.ReplyKeyboardRemove())
-            await OrderState.adress.set()
+            await message.answer('Обратите внимание!', reply_markup=types.ReplyKeyboardRemove())
+            await message.answer('У нас есть следующие категории продукции',reply_markup=keyboards.inline.categories_keyboard())
 
         case '📋Список заказов':
             try:
@@ -52,7 +51,7 @@ async def text_buttons_func(message: types.Message, state: FSMContext):
                 await message.answer('Пока нет позиций в базе')
 
         case '👨‍🦳 Список пользователей':
-            text = db.show_all_users()
+            text = db.generate_user_list()
             await message.answer(text)
 
         case '◀️Главное меню': 

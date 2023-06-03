@@ -11,5 +11,6 @@ class AddPosition(StatesGroup):
 
 class OrderState(StatesGroup):
     adress = State()
+    purchase = State()
 
 
