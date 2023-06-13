@@ -158,9 +158,10 @@ def get_user(uid):
 
 def generate_user_list():
     request = session.query(User).all()
-    text = "Ім'я | Номер телефону\n"
+    text = "Список пользователей\n\n"
     for row in request:
-        text += f'{row.name} | {row.tel_number}\n'
+        text += f'''Имя: {row.name}
+        Номер: {row.tel_number}\n\n'''
 
     return text
 

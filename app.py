@@ -16,7 +16,6 @@ async def on_startup(dispatcher):
     False - Не перезаписывать
     '''
     upload_all(True)
-
 if __name__ == '__main__':
     db.create_db()
     executor.start_polling(dp, on_startup=on_startup)
